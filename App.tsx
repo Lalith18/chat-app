@@ -9,12 +9,14 @@ import { auth } from './config/firebase';
 import Login from './src/screens/Login';
 import Signup from './src/screens/Signup';
 import Chat from './src/screens/Chat';
+import Home from './src/screens/Home';
 
 const Stack = createStackNavigator();
 
 function ChatStack() {
   return (
     <Stack.Navigator>
+      <Stack.Screen name='Home' component={Home}/>
       <Stack.Screen name='Chat' component={Chat} />
     </Stack.Navigator>
   );

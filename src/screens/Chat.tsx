@@ -1,10 +1,8 @@
 import React, {
   useState,
   useEffect,
-  useLayoutEffect,
   useCallback
 } from 'react';
-import { TouchableOpacity, Text } from 'react-native';
 import { GiftedChat } from 'react-native-gifted-chat';
 import {
   collection,
@@ -13,31 +11,13 @@ import {
   query,
   onSnapshot
 } from 'firebase/firestore';
-import { signOut } from 'firebase/auth';
 
 import { auth, database } from '../../config/firebase';
 
 const Chat = ({navigation}: {navigation: any}) => {
   const [messages, setMessages] = useState([]);
 
-  const onSignOut = () => {
-    signOut(auth).catch(error => console.log('Error logging out: ', error));
-  };
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity
-          style={{
-            marginRight: 10
-          }}
-          onPress={onSignOut}
-        >
-          <Text>Logout</Text>
-        </TouchableOpacity>
-      )
-    });
-  }, [navigation]);
+  
 
   useEffect(() => {
     const collectionRef = collection(database, 'chats');
