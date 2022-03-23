@@ -39,15 +39,13 @@ const Chat = ({navigation}: {navigation: any}) => {
     });
   }, [navigation]);
 
-  type docdata = {_id: any, createdAt: any, text: any, user: any}
-
   useEffect(() => {
     const collectionRef = collection(database, 'chats');
     const q = query(collectionRef, orderBy('createdAt', 'desc'));
 
-    const unsubscribe = onSnapshot(q, querySnapshot => {
+    const unsubscribe = onSnapshot(q, (querySnapshot: any) => {
       setMessages(
-        querySnapshot.docs.map(doc  => ({
+        querySnapshot.docs.map((doc: any)  => ({
           _id: doc.data()._id,
           createdAt: doc.data().createdAt.toDate(),
           text: doc.data().text,
@@ -74,7 +72,15 @@ const onSend = useCallback((messages = []) => {
   }, []);
 
   return (
-    <GiftedChat />
+    <GiftedChat
+      messages={messages}
+      showAvatarForEveryMessage={true}
+      onSend={messages => onSend(messages)}
+      user={{
+        _id: auth?.currentUser?.email || '',
+        avatar: 'https://i.pravatar.cc/300'
+      }}
+    />
   )
 }
 
