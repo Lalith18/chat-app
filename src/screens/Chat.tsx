@@ -20,7 +20,7 @@ const Chat = ({navigation}: {navigation: any}) => {
   
 
   useEffect(() => {
-    const collectionRef = collection(database, 'chats');
+    const collectionRef = collection(database, 'chats_groups');
     const q = query(collectionRef, orderBy('createdAt', 'desc'));
 
     const unsubscribe = onSnapshot(q, (querySnapshot: any) => {

@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Button, TextInput } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../config/firebase';
+import { auth, database } from '../../config/firebase';
+
+// Store new users data
+import { doc, setDoc } from "firebase/firestore";
+
+
+import LoginWithGoogle from '../components/LoginWithGoogle';
+
 
 export default function Signup({ navigation } : {navigation: any}) {
   const [email, setEmail] = useState('');
@@ -10,7 +17,17 @@ export default function Signup({ navigation } : {navigation: any}) {
   const onHandleSignup = () => {
     if (email !== '' && password !== '') {
   createUserWithEmailAndPassword(auth, email, password)
-        .then(() => console.log('Signup success'))
+        .then(() => {
+          setDoc(doc(database, "users", auth?.currentUser?.uid || ''), {
+            location: 'Chennai',
+            name: auth?.currentUser?.email || '',
+            phone_number: '9876543210',
+            role: 'help-seeker',
+            user_id: auth?.currentUser?.email || ''
+          })
+          console.log('Signup success')
+
+        })
         .catch(err => console.log(`Login err: ${err}`));
     }
   };
@@ -42,6 +59,7 @@ export default function Signup({ navigation } : {navigation: any}) {
         onPress={() => navigation.navigate('Login')}
         title='Go to Login'
       />
+      <LoginWithGoogle />
     </View>
   );
 }

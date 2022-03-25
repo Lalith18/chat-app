@@ -3,16 +3,20 @@ import { StyleSheet, Text, View, Button, TextInput } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../config/firebase';
 
+import LoginWithGoogle from '../components/LoginWithGoogle';
+
+
+
 const Login = ({ navigation}: {navigation: any}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const onHandleLogin = () => {
     if (email !== '' && password !== '') {
-     signInWithEmailAndPassword(auth, email, password)
-        .then(() => console.log('Login success'))
-        .catch(err => console.log(`Login err: ${err}`));
-    }
+         signInWithEmailAndPassword(auth, email, password)
+            .then(() => console.log('Login success'))
+            .catch(err => console.log(`Login err: ${err}`));
+        }
   };
 
   return (
@@ -43,6 +47,7 @@ const Login = ({ navigation}: {navigation: any}) => {
         onPress={() => navigation.navigate('Signup')}
         title='Go to Signup'
       />
+      <LoginWithGoogle />
     </View>
   );
 }
