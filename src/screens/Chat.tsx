@@ -14,13 +14,13 @@ import {
 
 import { auth, database } from '../../config/firebase';
 
-const Chat = ({navigation}: {navigation: any}) => {
+const Chat = ({navigation, route}: {navigation: any, route: any}) => {
   const [messages, setMessages] = useState([]);
 
-  
+  const { groupId} = route.params
 
   useEffect(() => {
-    const collectionRef = collection(database, 'chats_groups');
+    const collectionRef = collection(database, `chat_group/${groupId}/messages`);
     const q = query(collectionRef, orderBy('createdAt', 'desc'));
 
     const unsubscribe = onSnapshot(q, (querySnapshot: any) => {
@@ -43,7 +43,7 @@ const onSend = useCallback((messages = []) => {
       GiftedChat.append(previousMessages, messages)
     );
     const { _id, createdAt, text, user } = messages[0];    
-    addDoc(collection(database, 'chats'), {
+    addDoc(collection(database, `chat_group/${groupId}/messages`), {
       _id,
       createdAt,
       text,
@@ -56,9 +56,11 @@ const onSend = useCallback((messages = []) => {
       messages={messages}
       showAvatarForEveryMessage={true}
       onSend={messages => onSend(messages)}
+      renderUsernameOnMessage={true}
       user={{
         _id: auth?.currentUser?.email || '',
-        avatar: 'https://i.pravatar.cc/300'
+        avatar: 'https://i.pravatar.cc/300',
+        name: auth?.currentUser?.email || '',
       }}
     />
   )
