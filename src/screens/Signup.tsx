@@ -59,7 +59,7 @@ export default function Signup({ navigation } : {navigation: any}) {
         onPress={() => navigation.navigate('Login')}
         title='Go to Login'
       />
-      <LoginWithGoogle />
+      {/* <LoginWithGoogle /> */}
     </View>
   );
 }

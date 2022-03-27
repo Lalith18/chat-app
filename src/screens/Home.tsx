@@ -1,9 +1,11 @@
 import React, {useLayoutEffect, useState, useEffect} from 'react';
-import { View, Text, Button, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Button, TouchableOpacity, StyleSheet, Image} from 'react-native';
 import { signOut } from '@firebase/auth';
 import { auth, database } from '../../config/firebase';
 
 import { query, onSnapshot, doc, getDoc, collection } from '@firebase/firestore';
+
+import GroupTile from '../components/GroupTile';
 
 const Home = ({navigation}: {navigation: any}) => {
     const [groups, setGroups] = useState([]);
@@ -51,7 +53,7 @@ const Home = ({navigation}: {navigation: any}) => {
                         return newGroups.push({
                             _id: d.id,
                             groupName: d.data().group_name,
-                            groupDescription: d.data().description
+                            description: d.data().description
                         })
                     }
                 })
@@ -70,9 +72,50 @@ const Home = ({navigation}: {navigation: any}) => {
 
     return(
       <View>
-          {groups.map((group: any) => <Button key={group._id} title={group.groupName} onPress={() => {navigation.navigate('Chat', {groupId: group._id})}}/>)}
+          {groups.map((group: any) => <GroupTile key={group._id} onPress={() => {navigation.navigate('Chat', {groupId: group._id})}} group={group}/>)}
+          <View style={styles.container}>
+            
+            <Image
+              style={styles.img}
+              source={{
+                uri: 'https://i.pravatar.cc/300',
+              }}
+            />
+            <View style={styles.details}>
+                <Text style={styles.title} numberOfLines={1}>Title</Text>
+                <Text style={styles.description} >Description</Text>
+            </View>
+          </View>
+          
       </View>
     )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: 'white',
+    height: 100,
+    borderBottomWidth: 1,
+    borderBottomColor: 'grey',
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 5
+  },
+  img: {
+    height: '90%',
+    aspectRatio: 1,
+    borderRadius: 50
+  },
+  details : {
+    marginLeft: 25,
+    height: '100%',
+  },
+  title: {
+    fontSize: 25
+  },
+  description: {
+    fontSize: 20
+  }
+});
 
 export default Home;

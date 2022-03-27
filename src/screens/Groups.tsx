@@ -6,6 +6,7 @@ import { View, Button} from 'react-native';
 import { auth, database } from '../../config/firebase';
 import { query, onSnapshot, doc, getDoc, setDoc, collection } from '@firebase/firestore';
 
+import GroupTile from '../components/GroupTile';
 
 const Groups = ({navigation}: {navigation: any}) => {
     const [groups, setGroups] = useState([]);
@@ -35,7 +36,7 @@ const Groups = ({navigation}: {navigation: any}) => {
                         return newGroups.push({
                             _id: d.id,
                             groupName: d.data().group_name,
-                            groupDescription: d.data().description
+                            description: d.data().description
                         })
                     }
                 })
@@ -54,7 +55,7 @@ const Groups = ({navigation}: {navigation: any}) => {
       
     return(
         <View>
-            {groups.map((group: any) => <Button key={group._id} title={group.groupName} onPress={() => {onJoin(group._id)}}/>)}
+            {groups.map((group: any) => <GroupTile key={group._id} group={group} onPress={() =>{onJoin(group._id)}}/>)}
         </View>
     )
 }

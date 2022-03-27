@@ -47,7 +47,7 @@ const Login = ({ navigation}: {navigation: any}) => {
         onPress={() => navigation.navigate('Signup')}
         title='Go to Signup'
       />
-      <LoginWithGoogle />
+      {/* <LoginWithGoogle /> */}
     </View>
   );
 }
