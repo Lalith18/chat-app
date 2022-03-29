@@ -15,6 +15,9 @@ const GroupTile = ({group, onPress}:{group: any, onPress: any}) => {
                     <Text style={styles.title} numberOfLines={1}>{group.groupName}</Text>
                     <Text style={styles.description} >{group.description}</Text>
                 </View>
+                <View style={styles.countBubble}>
+                  <Text style={styles.count}>3</Text>
+                </View>
             </View>
         </TouchableOpacity>
     )
@@ -44,6 +47,20 @@ const styles = StyleSheet.create({
     },
     description: {
       fontSize: 20
+    },
+    countBubble: {
+      height: 30,
+      width: 30,
+      borderRadius: 50,
+      backgroundColor: 'green',
+      color: 'white',
+      position: 'absolute',
+      right: 10
+    },
+    count: {
+      color: 'white',
+      fontSize: 20,
+      textAlign: 'center',
     }
   });
 

@@ -3,9 +3,12 @@ import { View, Text, Button, TouchableOpacity, StyleSheet, Image} from 'react-na
 import { signOut } from '@firebase/auth';
 import { auth, database } from '../../config/firebase';
 
-import { query, onSnapshot, doc, getDoc, collection } from '@firebase/firestore';
+import { query, onSnapshot, doc, getDoc, collection, orderBy, limit } from '@firebase/firestore';
+
+
 
 import GroupTile from '../components/GroupTile';
+import { getDocs } from 'firebase/firestore';
 
 const Home = ({navigation}: {navigation: any}) => {
     const [groups, setGroups] = useState([]);
@@ -50,11 +53,18 @@ const Home = ({navigation}: {navigation: any}) => {
                 const docRef = doc(database, `chat_group/${d.id}/group_members`, auth?.currentUser?.uid || '' )
                 getDoc(docRef).then(doc => {
                     if (doc.exists()) {
-                        return newGroups.push({
+
+                      const collectionRef = collection(database, `chat_group/${d.id}/messages`)
+                      const q = query(collectionRef, orderBy('createdAt', 'desc'),limit(1))
+                      return getDocs(q).then(snap => {
+                        snap.forEach(msg => {
+                          return newGroups.push({
                             _id: d.id,
                             groupName: d.data().group_name,
-                            description: d.data().description
+                            description: msg.data().text
+                          })
                         })
+                      })
                     }
                 })
                 .then(d => {
@@ -73,20 +83,6 @@ const Home = ({navigation}: {navigation: any}) => {
     return(
       <View>
           {groups.map((group: any) => <GroupTile key={group._id} onPress={() => {navigation.navigate('Chat', {groupId: group._id})}} group={group}/>)}
-          <View style={styles.container}>
-            
-            <Image
-              style={styles.img}
-              source={{
-                uri: 'https://i.pravatar.cc/300',
-              }}
-            />
-            <View style={styles.details}>
-                <Text style={styles.title} numberOfLines={1}>Title</Text>
-                <Text style={styles.description} >Description</Text>
-            </View>
-          </View>
-          
       </View>
     )
 }

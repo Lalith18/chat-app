@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { View, Button} from 'react-native';
 
 import { auth, database } from '../../config/firebase';
-import { query, onSnapshot, doc, getDoc, setDoc, collection } from '@firebase/firestore';
+import { query, onSnapshot, doc, getDoc, setDoc, collection, getDocs, orderBy, limit } from '@firebase/firestore';
 
 import GroupTile from '../components/GroupTile';
 
@@ -33,11 +33,17 @@ const Groups = ({navigation}: {navigation: any}) => {
                 const docRef = doc(database, `chat_group/${d.id}/group_members`, auth?.currentUser?.uid || '' )
                 getDoc(docRef).then(doc => {
                     if (!doc.exists()) {
-                        return newGroups.push({
+                        const collectionRef = collection(database, `chat_group/${d.id}/messages`)
+                      const q = query(collectionRef, orderBy('createdAt', 'desc'),limit(1))
+                      return getDocs(q).then(snap => {
+                        snap.forEach(msg => {
+                          return newGroups.push({
                             _id: d.id,
                             groupName: d.data().group_name,
-                            description: d.data().description
+                            description: msg.data().text
+                          })
                         })
+                      })
                     }
                 })
                 .then(d => {
