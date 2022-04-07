@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { View, Button} from 'react-native';
 
 import { auth, database } from '../../config/firebase';
-import { query, onSnapshot, doc, getDoc, setDoc, collection, getDocs, orderBy, limit } from '@firebase/firestore';
+import { query, onSnapshot, doc, getDoc, setDoc, collection, getDocs, orderBy, limit, Timestamp } from '@firebase/firestore';
 
 import GroupTile from '../components/GroupTile';
 
@@ -16,7 +16,8 @@ const Groups = ({navigation}: {navigation: any}) => {
             location: 'Chennai',
             name: auth?.currentUser?.email || '',
             phone_number: '9876543210',
-            role: 'help-seeker'
+            role: 'help-seeker',
+            lastSeen: Timestamp.fromDate(new Date())
         }).then(result => {
             console.log(result);
             navigation.navigate('Chat', {groupId: groupId})   

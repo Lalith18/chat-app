@@ -15,9 +15,11 @@ const GroupTile = ({group, onPress}:{group: any, onPress: any}) => {
                     <Text style={styles.title} numberOfLines={1}>{group.groupName}</Text>
                     <Text style={styles.description} >{group.description}</Text>
                 </View>
-                <View style={styles.countBubble}>
-                  <Text style={styles.count}>3</Text>
-                </View>
+                {group.count > 0 && 
+                  <View style={styles.countBubble}>
+                    <Text style={styles.count}>{group.count}</Text>
+                  </View>
+                }
             </View>
         </TouchableOpacity>
     )

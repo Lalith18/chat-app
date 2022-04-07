@@ -12,6 +12,8 @@ import {
   onSnapshot
 } from 'firebase/firestore';
 
+import { updateDoc, doc, Timestamp } from '@firebase/firestore';
+
 import { auth, database } from '../../config/firebase';
 
 const Chat = ({navigation, route}: {navigation: any, route: any}) => {
@@ -19,19 +21,27 @@ const Chat = ({navigation, route}: {navigation: any, route: any}) => {
 
   const { groupId} = route.params
 
+  const updateLastSeen = (groupId: any) => {
+    return updateDoc(doc(database,`chat_group/${groupId}/group_members`,auth?.currentUser?.uid || ''), {
+      lastSeen: Timestamp.fromDate(new Date())
+    })
+  }
+
   useEffect(() => {
     const collectionRef = collection(database, `chat_group/${groupId}/messages`);
     const q = query(collectionRef, orderBy('createdAt', 'desc'));
 
     const unsubscribe = onSnapshot(q, (querySnapshot: any) => {
-      setMessages(
-        querySnapshot.docs.map((doc: any)  => ({
-          _id: doc.data()._id,
-          createdAt: doc.data().createdAt.toDate(),
-          text: doc.data().text,
-          user: doc.data().user
-        }))
-      );
+      updateLastSeen(groupId).then(() => {
+        setMessages(
+          querySnapshot.docs.map((doc: any)  => ({
+            _id: doc.data()._id,
+            createdAt: doc.data().createdAt.toDate(),
+            text: doc.data().text,
+            user: doc.data().user
+          }))
+        );
+      })
     });
 
     return () => unsubscribe();

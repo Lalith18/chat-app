@@ -3,12 +3,12 @@ import { View, Text, Button, TouchableOpacity, StyleSheet, Image} from 'react-na
 import { signOut } from '@firebase/auth';
 import { auth, database } from '../../config/firebase';
 
-import { query, onSnapshot, doc, getDoc, collection, orderBy, limit } from '@firebase/firestore';
+import { query, onSnapshot, doc, getDoc, collection, orderBy, limit, Timestamp } from '@firebase/firestore';
 
 
 
 import GroupTile from '../components/GroupTile';
-import { getDocs } from 'firebase/firestore';
+import { getDocs, updateDoc, where} from 'firebase/firestore';
 
 const Home = ({navigation}: {navigation: any}) => {
     const [groups, setGroups] = useState([]);
@@ -53,32 +53,57 @@ const Home = ({navigation}: {navigation: any}) => {
                 const docRef = doc(database, `chat_group/${d.id}/group_members`, auth?.currentUser?.uid || '' )
                 getDoc(docRef).then(doc => {
                     if (doc.exists()) {
-
-                      const collectionRef = collection(database, `chat_group/${d.id}/messages`)
-                      const q = query(collectionRef, orderBy('createdAt', 'desc'),limit(1))
-                      return getDocs(q).then(snap => {
-                        snap.forEach(msg => {
-                          return newGroups.push({
-                            _id: d.id,
-                            groupName: d.data().group_name,
-                            description: msg.data().text
+                      const lastSeen = doc.data().lastSeen.toDate()
+                      const collectionlRef = collection(database, `chat_group/${d.id}/messages`)
+                      const ql = query(collectionlRef, where('createdAt', '>', lastSeen))
+                      getDocs(ql).then((snapshot: any) => {
+                        let total_count = 0;
+                        snapshot.forEach((doc: any) => {
+                            total_count += 1;
+                        });
+                        const grp = { count: total_count}
+                        return grp
+                      })
+                      .then((grp) => {
+                        const collectionRef = collection(database, `chat_group/${d.id}/messages`)
+                        const q = query(collectionRef, orderBy('createdAt', 'desc'),limit(1))
+                        return getDocs(q).then(snap => {
+                          snap.forEach(msg => {
+                            return newGroups.push({
+                              ...grp,
+                              _id: d.id,
+                              groupName: d.data().group_name,
+                              description: msg.data().text
+                            })
                           })
                         })
                       })
+                      .then(grpdata => {
+                        setGroups(newGroups.map((grpdata:any) => grpdata))
+                      })
+                      .catch(err => {
+                        console.log(err)
+                      })
                     }
-                })
-                .then(d => {
-                    setGroups(newGroups.map((d:any) => d))
-                })
-                .catch(err => {
-                    console.log(err);
-                    
                 })
             })
         });
 
         return () => unsubscribe();
       }, []);
+
+      const getCount = (lastSeen: any, groupId: String) => {
+        const collectionRef = collection(database, `chat_group/${groupId}/messages`)
+        const q = query(collectionRef, where('createdAt', '>', lastSeen))
+        return getDocs(q).then((snapshot: any) => {
+          let total_count = 0;
+          snapshot.forEach((doc: any) => {
+              total_count += 1;
+          });
+  
+          console.log(total_count)
+      });
+      }
 
     return(
       <View>
