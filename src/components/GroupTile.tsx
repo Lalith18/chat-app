@@ -12,13 +12,24 @@ const GroupTile = ({group, onPress}:{group: any, onPress: any}) => {
                 }}
                 />
                 <View style={styles.details}>
+                  <View style={styles.subDetails}> 
                     <Text style={styles.title} numberOfLines={1}>{group.groupName}</Text>
-                    <Text style={styles.description} >{group.description}</Text>
+                    {
+                      group.lastMsg &&
+                      <Text style={styles.time} >
+                      {
+                        group.lastMsgTime.getHours() > 12 ? (group.lastMsgTime.getHours()%12) + ":" + group.lastMsgTime.getMinutes() + " PM" : group.lastMsgTime.getHours() + ":" + group.lastMsgTime.getMinutes() + " AM"
+                      }
+                      </Text>
+                    }
+                  </View>
+                  {group.lastMsg && <Text style={styles.description} >{group.lastMsg}</Text>}
                 </View>
-                {group.count > 0 && 
+                {group.count && group.count > 0 ?
                   <View style={styles.countBubble}>
                     <Text style={styles.count}>{group.count}</Text>
                   </View>
+                  : <View></View>
                 }
             </View>
         </TouchableOpacity>
@@ -43,6 +54,7 @@ const styles = StyleSheet.create({
     details : {
       marginLeft: 25,
       height: '100%',
+      width: '70%',
     },
     title: {
       fontSize: 25
@@ -63,6 +75,15 @@ const styles = StyleSheet.create({
       color: 'white',
       fontSize: 20,
       textAlign: 'center',
+    },
+    subDetails: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    time: {
+      color: 'grey',
+      fontSize: 16,
     }
   });
 

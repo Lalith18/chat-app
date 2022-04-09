@@ -40,8 +40,7 @@ const Groups = ({navigation}: {navigation: any}) => {
                         snap.forEach(msg => {
                           return newGroups.push({
                             _id: d.id,
-                            groupName: d.data().group_name,
-                            description: msg.data().text
+                            groupName: d.data().group_name
                           })
                         })
                       })

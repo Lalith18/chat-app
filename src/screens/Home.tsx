@@ -73,7 +73,8 @@ const Home = ({navigation}: {navigation: any}) => {
                               ...grp,
                               _id: d.id,
                               groupName: d.data().group_name,
-                              description: msg.data().text
+                              lastMsg: msg.data().text,
+                              lastMsgTime: msg.data().createdAt.toDate()
                             })
                           })
                         })
