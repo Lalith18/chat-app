@@ -17,9 +17,7 @@ const GroupTile = ({group, onPress}:{group: any, onPress: any}) => {
                     {
                       group.lastMsg &&
                       <Text style={styles.time} >
-                      {
-                        group.lastMsgTime.getHours() > 12 ? (group.lastMsgTime.getHours()%12) + ":" + group.lastMsgTime.getMinutes() + " PM" : group.lastMsgTime.getHours() + ":" + group.lastMsgTime.getMinutes() + " AM"
-                      }
+                        {group.lastMsgTime.getHours() > 12 ? (group.lastMsgTime.getHours()%12) + ":" + group.lastMsgTime.getMinutes() + " PM" : group.lastMsgTime.getHours() + ":" + group.lastMsgTime.getMinutes() + " AM"}
                       </Text>
                     }
                   </View>

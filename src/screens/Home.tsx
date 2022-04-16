@@ -11,6 +11,16 @@ import GroupTile from '../components/GroupTile';
 import { getDocs, updateDoc, where} from 'firebase/firestore';
 
 const Home = ({navigation}: {navigation: any}) => {
+    const compare = (a: any,b: any) => {
+      if(a.lastMsgTime && b.lastMsgTime) {
+        return b.lastMsgTime - a.lastMsgTime
+      } else if (a.lastMsgTime) {
+        return 1
+      } else {
+        return -1
+      }
+    } 
+
     const [groups, setGroups] = useState([]);
     const onSignOut = () => {
         signOut(auth).catch(error => console.log('Error logging out: ', error));
@@ -68,19 +78,30 @@ const Home = ({navigation}: {navigation: any}) => {
                         const collectionRef = collection(database, `chat_group/${d.id}/messages`)
                         const q = query(collectionRef, orderBy('createdAt', 'desc'),limit(1))
                         return getDocs(q).then(snap => {
-                          snap.forEach(msg => {
+                          console.log(snap.docs.length)
+                          if(snap.docs.length === 0) {
                             return newGroups.push({
                               ...grp,
                               _id: d.id,
-                              groupName: d.data().group_name,
-                              lastMsg: msg.data().text,
-                              lastMsgTime: msg.data().createdAt.toDate()
+                              groupName: d.data().group_name
                             })
-                          })
+                          } else {
+                            snap.forEach(msg => {
+                              return newGroups.push({
+                                ...grp,
+                                _id: d.id,
+                                groupName: d.data().group_name,
+                                lastMsg: msg.data().text,
+                                lastMsgTime: msg.data().createdAt.toDate()
+                              })
+                            })
+                          }
                         })
                       })
                       .then(grpdata => {
+                        newGroups.sort(compare)
                         setGroups(newGroups.map((grpdata:any) => grpdata))
+                        
                       })
                       .catch(err => {
                         console.log(err)
