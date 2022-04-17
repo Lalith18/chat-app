@@ -1,16 +1,33 @@
 import React, {useLayoutEffect, useState, useEffect} from 'react';
-import { View, Text, Button, TouchableOpacity, StyleSheet, Image} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import { signOut } from '@firebase/auth';
 import { auth, database } from '../../config/firebase';
-
-import { query, onSnapshot, doc, getDoc, collection, orderBy, limit, Timestamp } from '@firebase/firestore';
-
-
-
+import { query, onSnapshot, doc, getDoc, collection, orderBy, limit, collectionGroup, deleteDoc, getDocs, where } from '@firebase/firestore';
 import GroupTile from '../components/GroupTile';
-import { getDocs, updateDoc, where} from 'firebase/firestore';
 
 const Home = ({navigation}: {navigation: any}) => {
+    
+    const [groups, setGroups] = useState<any[]>([])
+    const [selectMode, setSelectMode] = useState(false)
+
+    const onLongPress = (groupId: any) => {
+      setSelectMode(true)
+
+      const newGroups =  groups.map((group) => {
+        if(group._id === groupId) {
+          return {...group, selected: !group.selected}
+        }
+        return group
+      })
+
+      setGroups(newGroups.map(group => group))
+
+      const selectedGroups = newGroups.filter(group => group.selected === true)
+      if (selectedGroups.length === 0) {
+        setSelectMode(false)
+      }
+    }
+
     const compare = (a: any,b: any) => {
       if(a.lastMsgTime && b.lastMsgTime) {
         return b.lastMsgTime - a.lastMsgTime
@@ -20,44 +37,90 @@ const Home = ({navigation}: {navigation: any}) => {
         return -1
       }
     } 
-
-    const [groups, setGroups] = useState([]);
     const onSignOut = () => {
         signOut(auth).catch(error => console.log('Error logging out: ', error));
       };
 
+    const unselectAll = () => {
+      setSelectMode(false)
+      setGroups(groups.map(group => {
+        return {...group, selected: false}
+      }))
+    }
+
+    const deleteGroups = () => {
+      let filteredGroups = groups
+      groups.forEach(group => {
+        if(group.selected) {
+          const groupId = group._id
+          deleteDoc(doc(database,'chat_group',groupId,'group_members',auth?.currentUser?.uid || ''))
+          filteredGroups = filteredGroups.filter(group => group._id !== groupId)
+        }
+      })
+      setGroups(filteredGroups.map(group => group))
+      setSelectMode(false)
+    }
+
+    const generalHeaderOptions = {
+      headerLeft: () => (
+        <TouchableOpacity
+          style={{
+            marginLeft: 10
+          }}
+          onPress={() => {navigation.navigate('Groups')}}
+        >
+          <Text>Join a Group</Text>
+        </TouchableOpacity>
+        
+      ),
+      headerRight: () => (
+        <TouchableOpacity
+          style={{
+            marginRight: 10
+          }}
+          onPress={onSignOut}
+        >
+          <Text>Logout</Text>
+        </TouchableOpacity>
+        
+      )
+    }
+
+    const selectHeaderOptions = {
+      headerLeft: () => (
+        <TouchableOpacity
+          style={{
+            marginLeft: 10
+          }}
+          onPress={unselectAll}
+        >
+          <Text>Back</Text>
+        </TouchableOpacity>
+        
+      ),
+      headerRight: () => (
+        <TouchableOpacity
+          style={{
+            marginRight: 10
+          }}
+          onPress={deleteGroups}
+        >
+          <Text>Delete Groups</Text>
+        </TouchableOpacity>
+        
+      )
+    }
+
     useLayoutEffect(() => {
-        navigation.setOptions({
-          headerLeft: () => (
-            <TouchableOpacity
-              style={{
-                marginLeft: 10
-              }}
-              onPress={() => {navigation.navigate('Groups')}}
-            >
-              <Text>Join a Group</Text>
-            </TouchableOpacity>
-            
-          ),
-          headerRight: () => (
-            <TouchableOpacity
-              style={{
-                marginRight: 10
-              }}
-              onPress={onSignOut}
-            >
-              <Text>Logout</Text>
-            </TouchableOpacity>
-            
-          )
-        });
-      }, [navigation]);
+        navigation.setOptions( selectMode ? selectHeaderOptions : generalHeaderOptions);
+      }, [navigation, selectMode, groups]);
 
       useEffect(() => {
-        const collectionRef = collection(database,'chat_group');
-        const q = query(collectionRef);
-
-        const unsubscribe = onSnapshot(q, (querySnapshot: any) => {
+        const qm = query(collectionGroup(database, 'messages'))
+        const unsubscriber = onSnapshot(qm, (m: any) => {
+          const collectionRef = collection(database,'chat_group');
+          const q = query(collectionRef)
+          onSnapshot(q, (querySnapshot: any) => {
             const newGroups: any = [];
             querySnapshot.docs.forEach((d: any) => {
                 const docRef = doc(database, `chat_group/${d.id}/group_members`, auth?.currentUser?.uid || '' )
@@ -71,14 +134,13 @@ const Home = ({navigation}: {navigation: any}) => {
                         snapshot.forEach((doc: any) => {
                             total_count += 1;
                         });
-                        const grp = { count: total_count}
+                        const grp = { count: total_count, selected: false}
                         return grp
                       })
                       .then((grp) => {
                         const collectionRef = collection(database, `chat_group/${d.id}/messages`)
                         const q = query(collectionRef, orderBy('createdAt', 'desc'),limit(1))
                         return getDocs(q).then(snap => {
-                          console.log(snap.docs.length)
                           if(snap.docs.length === 0) {
                             return newGroups.push({
                               ...grp,
@@ -109,27 +171,14 @@ const Home = ({navigation}: {navigation: any}) => {
                     }
                 })
             })
-        });
-
-        return () => unsubscribe();
+          })
+        })
+        return () => unsubscriber();
       }, []);
-
-      const getCount = (lastSeen: any, groupId: String) => {
-        const collectionRef = collection(database, `chat_group/${groupId}/messages`)
-        const q = query(collectionRef, where('createdAt', '>', lastSeen))
-        return getDocs(q).then((snapshot: any) => {
-          let total_count = 0;
-          snapshot.forEach((doc: any) => {
-              total_count += 1;
-          });
-  
-          console.log(total_count)
-      });
-      }
 
     return(
       <View>
-          {groups.map((group: any) => <GroupTile key={group._id} onPress={() => {navigation.navigate('Chat', {groupId: group._id})}} group={group}/>)}
+          {groups.map((group: any) => <GroupTile key={group._id} onPress={() => navigation.navigate('Chat', {groupId: group._id})} group={group} selectMode={selectMode} onLongPress={onLongPress} />)}
       </View>
     )
 }

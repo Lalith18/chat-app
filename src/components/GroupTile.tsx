@@ -1,16 +1,23 @@
 import React from 'react'
 import { View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
 
-const GroupTile = ({group, onPress}:{group: any, onPress: any}) => {
+const GroupTile = ({group, onPress, selectMode, onLongPress}:{group: any, onPress: any, selectMode: boolean, onLongPress: any}) => {
+
+    const longPressed = () => {
+      onLongPress(group._id)
+    } 
     return(
-        <TouchableOpacity onPress={onPress}>
+        <TouchableOpacity onPress={selectMode ? longPressed : onPress} onLongPress={longPressed}>
             <View style={styles.container}>
+              <View>
                 <Image
                 style={styles.img}
                 source={{
                     uri: 'https://i.pravatar.cc/300',
                 }}
                 />
+                {group.selected && <View style={styles.selected} />}
+              </View>
                 <View style={styles.details}>
                   <View style={styles.subDetails}> 
                     <Text style={styles.title} numberOfLines={1}>{group.groupName}</Text>
@@ -43,6 +50,15 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       alignItems: 'center',
       padding: 5
+    },
+    selected: {
+      height: 30,
+      width: 30,
+      borderRadius: 50,
+      backgroundColor: 'lightgreen',
+      position: 'absolute',
+      bottom: 0,
+      right: 0
     },
     img: {
       height: '90%',

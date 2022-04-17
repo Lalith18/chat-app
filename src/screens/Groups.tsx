@@ -1,12 +1,11 @@
 
 import React from 'react';
-import { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
+import { useState, useEffect} from 'react';
+import { View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 
 import { auth, database } from '../../config/firebase';
-import { query, onSnapshot, doc, getDoc, setDoc, collection, getDocs, orderBy, limit, Timestamp } from '@firebase/firestore';
+import { query, onSnapshot, doc, getDoc, setDoc, collection, Timestamp } from '@firebase/firestore';
 
-import GroupTile from '../components/GroupTile';
 
 const Groups = ({navigation}: {navigation: any}) => {
     const [groups, setGroups] = useState([]);
@@ -18,8 +17,7 @@ const Groups = ({navigation}: {navigation: any}) => {
             phone_number: '9876543210',
             role: 'help-seeker',
             lastSeen: Timestamp.fromDate(new Date())
-        }).then(result => {
-            console.log(result);
+        }).then(() => {
             navigation.navigate('Chat', {groupId: groupId})   
         })
     }
